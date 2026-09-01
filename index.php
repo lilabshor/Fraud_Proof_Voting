@@ -13,3 +13,7 @@ mysqli_stmt_store_result($stmt);
 $after_vote = mysqli_stmt_num_rows($stmt) > 0;
 mysqli_stmt_close($stmt);
 
+$error = $_SESSION[`error`] ?? null;
+$success = $_SESSION[`success`] ?? null;
+unset($_SESSION[`error`], $_SESSION[`success`]);
+
