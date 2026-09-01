@@ -44,3 +44,8 @@ function verify_csrf_token(?string $token): bool
     return hash_equals($_SESSION['csrf_token'], $token);
 }
 
+function e(string $value) : string
+{
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
