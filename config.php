@@ -35,3 +35,12 @@ function generate_csrf_token(): string
     return $_SESSION['csrf_token'];
 }
 
+
+function verify_csrf_token(?string $token): bool
+{
+    if (empty($token) || empty($_SESSION['csrf_token'])) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
