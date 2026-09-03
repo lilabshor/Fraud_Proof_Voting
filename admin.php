@@ -1,4 +1,5 @@
 <?php
+global $conn;
 require_once "config.php";
 
 $is_admin = !empty($_SESSION['is_admin']);
@@ -29,33 +30,52 @@ if (isset($_POST['submit']) && $_POST['submit'] == 'logout') {
     exit();
 }
 
-if ($is_admin) ;
-?>
+if ($is_admin) :
+    ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login Admin</title>
-    <style>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Login Admin</title>
+        <style>
 
-    </style>
-</head>
-<body>
-<div class="card">
-    <h3 style="text-align: center; margin-bottom: 15px;">Login Admin vote</h3>
-    <?php foreach ($errors as $e) : ?> <p style="color: red; font-size: 13px;"><?= e($e) ?></p><?php endforeach ?>
-    <form action="admin.php" method="POST">
-        <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
-        <input type="hidden" name="submit" value="login">
-        <div class="form-group"><label>Username</label><input type="text" name="username" required></div>
-        <div class="form-group"><label>password</label><input type="password" name="password" required></div>
-        <button type="submit" class="btn">Masuk</button>
-    </form>
-    <p style="text-align: center; margin-top: 10px;"><a href="index.php"
-                                                        style="font-size: 12px; color: #38a169">Kembali</a></p>
-</div>
-</body>
-</html>
-<?php exit(); ?>
+        </style>
+    </head>
+    <body>
+    <div class="card">
+        <h3 style="text-align: center; margin-bottom: 15px;">Login Admin vote</h3>
+        <?php foreach ($errors as $e) : ?> <p style="color: red; font-size: 13px;"><?= e($e) ?></p><?php endforeach ?>
+        <form action="admin.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
+            <input type="hidden" name="submit" value="login">
+            <div class="form-group"><label>Username</label><input type="text" name="username" required></div>
+            <div class="form-group"><label>password</label><input type="password" name="password" required></div>
+            <button type="submit" class="btn">Masuk</button>
+        </form>
+        <p style="text-align: center; margin-top: 10px;"><a href="index.php"
+                                                            style="font-size: 12px; color: #38a169">Kembali</a></p>
+    </div>
+    </body>
+    </html>
+    <?php exit; endif;
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['submit'] ?? ``) === 'tambah') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? ``)) {
+        $errors[] = "Csrf token tidak valid";
+    } else {
+        $nama = trim($_POST[`nama_kandidat`] ?? '');
+        $deskripsi = trim($_POST[`deskripsi_kandidat`] ?? '');
+        if ($nama === '') {
+            $errors[] = "Nama kandidat tidak boleh kosong";
+        } else {
+            $stmt = mysqli_prepare($conn, "INSERT INTO kandidat (nama_kandidat, deskripsi_kandidat, deskripsi) VALUES (?, ?)");
+            mysqli_stmt_bind_param($stmt, "ss", $nama, $deskripsi);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            $_SESSION['success'] = "Kandidat berhasil ditambahkan";
+            header('location: admin.php');
+            exit();
+        }
 
+    }
+}
