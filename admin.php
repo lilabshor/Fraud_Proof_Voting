@@ -105,3 +105,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['submit'] ?? ``) === 'hapus
         exit();
     }
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['submit'] ?? ``) === 'reset_vote') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? ``)) {
+        $errors[] = "Csrf token tidak valid";
+    } else {
+        mysqli_query($conn, "TRUNCATE TABLE vote");
+        $_SESSION['success'] = "Kandidat berhasil direset vote";
+        header('location: admin.php');
+        exit();
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html >
+    <head>
+        <title> Panel Admin voting</title>
+        <style>
+
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="header" >
+                <h2>Panel Kontrol Admin</h2>
+                <form action="admin.php" method="POST" style="margin: 0;">
+                    <input type="hidden" name="submit" value="logout">
+                    <button type="submit" class="btn btn-logout">Logout</button>
+                </form>
+            </div>
+        </div>
+        <?php if ($succes) : ?><p style="color: green;"><?= e($succes) ?></p> <?php endif; ?>
+        <?php if ($errors) : ?><p style="color: red;"><?= e($errors) ?></p> <?php endif; ?>
+
+        <h3>TAMBAH kandidat Baru</h3>
+        <form action="admin.php" method="POST" style="margin-bottom: 25px;">
+            <input type="hidden" name="csrf_token" value="<?= e(generate_csrf_token()) ?>">
+            <input type="hidden" name="submit" value="tambah">
+            <input type="text" name="nama_kandidat" placeholder="nama paslon" required style="width: 100%; margin: 4px 0 8px"; >
+            <textarea name="deskripsi" placeholder="deskripsi visi misi" rows ="2" style="width: 100%; padding: 6px;"></textarea>
+            <button type="submit" class="btn" style="margin-top: 6px;">Simpan Kandidat</button>
+        </form>
+    </body>
+</html>
