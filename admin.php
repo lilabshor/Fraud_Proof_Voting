@@ -23,3 +23,8 @@ if (isset($_POST['submit']) && $_POST['submit'] == 'login') {
     }
 }
 
+if(isset($_POST['submit']) && $_POST['submit'] == 'logout') {
+    unset($_SESSION['is_admin']);
+    header('location: admin.php');
+    exit();
+}
