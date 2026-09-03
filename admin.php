@@ -79,3 +79,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['submit'] ?? ``) === 'tamba
 
     }
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['submit'] ?? ``) === 'hapus') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? ``)) {
+        $errors[] = "Csrf token tidak valid";
+    } else {
+        $id = (int) ($_POST['id'] ?? 0);
+        $cek = mysqli_prepare($conn, "SELECT id FROM vote WHERE kandidat_id = ? LIMIT 1");
+        mysqli_stmt_bind_param($cek, "i", $id);
+        mysqli_stmt_execute($cek);
+        mysqli_stmt_store_result($cek);
+        if (mysqli_stmt_num_rows($cek) > 0) {
+            mysqli_stmt_close($cek);
+            $_SESSION['error_hapus'] = "kandidat ini sudah memiliki vote. reset vote dulu jika ingin menghapus kandidat";
+            header('location: admin.php');
+            exit();
+        }
+        mysqli_stmt_close($cek);
+        $stmt = mysqli_prepare($conn, "DELETE FROM kandidat WHERE id = ?");
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        $_SESSION['success'] = "Kandidat berhasil dihapus";
+        header('location: admin.php');
+        exit();
+    }
+}
